@@ -128,8 +128,8 @@ class TokenController extends Controller
             $final_query = http_build_query($params["args"]);
         }
         $results = DB::table('tokens')->where('api_key', $params["api_key"] )->first();
+        
         if ($results) {
-            // return $results->token;
             $oauth = $results->token;
             $mid = $results->m_id;
             $ch = curl_init();
@@ -149,17 +149,62 @@ class TokenController extends Controller
                 "status" => $httpcode
             ];
             return response($responseArr);
-            // print($result);
-            // print($httpcode);
-            // print($oauth);
+            
         }else {
             $responseArr = [
-                "err_msg" => "API Key Invelid",
+                "err_msg" => "API Key Invalid",
                 "status" => "401"
             ];
             return response($responseArr);
         }
         
+    }
+
+    // get single employee
+    public function getSignleCustomer(Request $request)
+    {
+        $params = $request->all();
+        $final_query = "";
+        if(!isset($params["api_key"]) || $params["api_key"] ==""){
+            $responseArr = [
+                "err_msg" => "Api Key neeeded",
+                "status" => "401"
+            ];
+            return response($responseArr);
+        }
+
+        if(isset($params["expand"])){
+            $final_query .= $params["expand"];
+        }
+
+        $results = DB::table('tokens')->where('api_key', $params["api_key"] )->first();
+        if ($results) {
+            $oauth = $results->token;
+            $mid = $results->m_id;
+            $ch = curl_init();
+            $url = 'https://apisandbox.dev.clover.com/v3/merchants/' . $mid . '/customers/'.$params["customer_id"].'?expand='.$final_query;
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+            'Authorization: Bearer ' . $oauth,
+            'Content-Type: application/json'
+            ));
+            $result = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            $responseArr = [
+                "response" => $result,
+                "status" => $httpcode
+            ];
+            return response($responseArr);
+            
+        }else {
+            $responseArr = [
+                "err_msg" => "API Key Invalid",
+                "status" => "401"
+            ];
+            return response($responseArr);
+        }
     }
 // Product Export
     public function post_inventory(Request $request)

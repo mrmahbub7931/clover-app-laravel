@@ -19,3 +19,4 @@ Route::get('/orders', [TokenController::class, 'get_order']);
 Route::get('/export-inventory', [TokenController::class, 'post_inventory']);
 Route::get('/update-inventory', [TokenController::class, 'update_inventory']);
 Route::get('/delete-inventory', [TokenController::class, 'deleteItem']);
+Route::get('/customer', [TokenController::class, 'getSignleCustomer']);
